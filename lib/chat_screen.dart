@@ -15,7 +15,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   //----------------------
   final GoogleSignIn googleSignIn = GoogleSignIn();
-  late User _currenteUser;
+  User? _currenteUser;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
   //
@@ -52,7 +52,7 @@ class _ChatScreenState extends State<ChatScreen> {
 //----------------------
   void _sendMessage({String? text, File? imgFile}) async {
 //----------------------
-    // final User? user = await _getUser();
+    //final User? user = await _getUser();
 //----------------------
     // if (user == null) {
     //   //_scaffoldKey.currentState!.showSnackBar(const SnackBar(content: Text("NÃO LOGADO")));
