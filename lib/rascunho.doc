@@ -1,0 +1,95 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
+void main() async {
+  runApp(MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  
+  //ESCREVER no objeto msg, no arquivo msg1 as informaçãoes em qlqr parte do projeto uma vez que ha conexão com o banco no main
+  /*FirebaseFirestore.instance.collection("msg").doc("msg1").set({
+    "texto": "ola",
+    "from": "Dario",
+    "read": false,
+  });*/
+//ESCREVER com ID unico, não tem inf no .doc()
+  /*FirebaseFirestore.instance.collection("msg").doc().set({
+    "texto": "ola",
+    "from": "Dario Maciel",
+    "read": false,
+  });*/
+//para ESCREVER e alterar pelo ID, que lê e  atualiza todos os dados.
+
+  /*FirebaseFirestore.instance.collection("msg").doc("qkKYeDazPGVQXPS32f3S").set({
+    "texto": "ola",
+    "from": "José",
+    "read": false,
+  });*/
+//
+
+//para ESCREVER e atualizar unico, substituir "set" por "update" e deixar somente o item a ser atualizado. ex:"read"
+/*FirebaseFirestore.instance.collection("msg").doc("qkKYeDazPGVQXPS32f3S").update({
+    "read": true,
+  });*/
+
+// LER todos os dados da COLEÇÃO "msg"
+  /*QuerySnapshot snap = await FirebaseFirestore.instance.collection("msg").get();
+  snap.docs.forEach((d) {
+    print(d.data());
+//atualizar somente campos
+    d.reference.update({"read": true});
+  });*/
+
+  // LER somente os dados da COLEÇÃO "msg", document qkKYeDazPGVQXPS32f3S
+  //substituir  "QuerySnapshot" por "DocumentSnapshot"
+  //substituir "snap.docs.forEach((d) {print(d.data());});" por "print(snap.data);"
+  //data é a informação dentro da msg1
+  /*
+  DocumentSnapshot snap = await FirebaseFirestore.instance
+      .collection("msg")
+      .doc("qkKYeDazPGVQXPS32f3S")
+      .get();
+  print(snap.data);
+  //imprime ID do documento
+  print(snap.id);
+  */
+
+  //Atualização em tempo real
+  //sempre que chegar um novo dado na coleção msg, será tirada um snapshots e passada a função listen
+  /*FirebaseFirestore.instance.collection("msg").snapshots().listen((dado) {
+    //print(dado.docs[0].data());
+    //ou
+    dado.docs.forEach((e) {
+      print(e.data());
+    });
+  });*/
+
+  //Atualização em tempo real
+  //sempre que chegar um novo dado na coleção msg, qkKYeDazPGVQXPS32f3S,  será tirada um snapshots e passada a função listen imprimindo
+  /*FirebaseFirestore.instance
+      .collection("msg")
+      .doc("qkKYeDazPGVQXPS32f3S")
+      .snapshots()
+      .listen((dado) {
+    print(dado.data());
+  });*/
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: Container(),
+    );
+  }
+}
