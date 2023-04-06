@@ -17,6 +17,7 @@ class _ChatScreenState extends State<ChatScreen> {
     if (imgFile != null) {
       UploadTask task = FirebaseStorage.instance
           .ref()
+          .child("casa")
           .child(DateTime.now().millisecondsSinceEpoch.toString())
           .putFile(imgFile);
 
