@@ -16,8 +16,7 @@ class _TextComposerState extends State<TextComposer> {
   final _controllerEC = TextEditingController();
   bool _isComposing = false;
   final ImagePicker picker = ImagePicker();
-  //File? imagemSelecionada;
-  late File selectedImage;
+  late File convertedImage;
 
 //
   void reset() {
@@ -27,15 +26,12 @@ class _TextComposerState extends State<TextComposer> {
     });
   }
 
-  // pegarImagemCamera() async {
-  //   final XFile? image = await picker.pickImage(source: ImageSource.camera);
-  //   if (image != null) {
-  //     setState(() {
-  //       imagemSelecionada = File(image.path);
-  //     });
-  //     widget.sendMessage(imgFile: imagemSelecionada);
-  //   }
-  // }
+  void pegarImagemCamera() async {
+    final XFile? imgFile = await picker.pickImage(source: ImageSource.camera);
+    if (imgFile == null) return;
+    convertedImage = File(imgFile.path);
+    widget.sendMessage(imgFile: convertedImage);
+  }
 
 //
   @override
@@ -51,12 +47,7 @@ class _TextComposerState extends State<TextComposer> {
         children: [
           IconButton(
             onPressed: () async {
-              final XFile? imgFile =
-                  await picker.pickImage(source: ImageSource.camera);
-              if (imgFile == null) return;
-              selectedImage = File(imgFile.path);
-              widget.sendMessage(imgFile: selectedImage);
-              //
+              pegarImagemCamera();
             },
             icon: const Icon(Icons.photo_camera),
           ),
