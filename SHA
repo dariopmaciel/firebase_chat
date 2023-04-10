@@ -1,0 +1,21 @@
+dario@dario-System-Product-Name:~/Documentos/GitHub/firebase_chat$ keytool -list -v \
+-alias androiddebugkey -keystore ~/.android/debug.keystore
+Informe a senha da área de armazenamento de chaves:  
+Nome do alias: androiddebugkey
+Data de criação: 30 de mar. de 2023
+Tipo de entrada: PrivateKeyEntry
+Comprimento da cadeia de certificados: 1
+Certificado[1]:
+Proprietário: C=US, O=Android, CN=Android Debug
+Emissor: C=US, O=Android, CN=Android Debug
+Número de série: 1
+Válido de: Thu Mar 30 16:57:07 BRT 2023 até: Sat Mar 22 16:57:07 BRT 2053
+Fingerprints do certificado:
+         SHA1: A8:D4:BC:8A:49:A7:43:E7:8E:B7:40:64:64:4E:9E:DE:6A:03:72:0A
+         SHA256: D9:4B:94:A8:EC:6F:10:ED:27:21:19:D9:BE:73:31:01:36:F4:E6:7D:DC:DB:DA:8D:BC:A0:8A:7D:51:F3:9D:A1
+Nome do algoritmo de assinatura: SHA1withRSA (fraca)
+Algoritmo de Chave Pública do Assunto: Chave RSA de 2048 bits
+Versão: 1
+
+Warning:
+O certificado uses the SHA1withRSA signature algorithm which is considered a security risk.

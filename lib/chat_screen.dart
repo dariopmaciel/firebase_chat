@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_chat/chat_message.dart';
 import 'package:firebase_chat/text_composer.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -16,65 +17,75 @@ class _ChatScreenState extends State<ChatScreen> {
   //----------------------
   final GoogleSignIn googleSignIn = GoogleSignIn();
   User? _currenteUser;
-  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GlobalKey<ScaffoldMessengerState> _scaffoldKey =
       GlobalKey<ScaffoldMessengerState>();
+  // final GlobalKey<ScaffoldMessengerState> _scaffoldKey =      GlobalKey<ScaffoldMessengerState>();
+
   //
   @override
   void initState() {
     super.initState();
     FirebaseAuth.instance.authStateChanges().listen((user) {
-      _currenteUser = user!;
+      _currenteUser = user;
     });
   }
   //----------------------
 
   //
-  // Future<User?> _getUser() async {
-  //   if (_currenteUser != null) return _currenteUser;
-  //   try {
-  //     final GoogleSignInAccount? googleSignInAccount =
-  //         await googleSignIn.signIn();
-  //     final GoogleSignInAuthentication googleSignInAuthentication =
-  //         await googleSignInAccount!.authentication;
-  //     final AuthCredential credential = GoogleAuthProvider.credential(
-  //         idToken: googleSignInAuthentication.idToken,
-  //         accessToken: googleSignInAuthentication.accessToken);
-  //     final UserCredential authResult =
-  //         await FirebaseAuth.instance.signInWithCredential(credential);
-  //     final User? user = authResult.user;
-  //     return user;
-  //     //
-  //   } catch (e) {
-  //     return null;
-  //   }
-  // }
+  Future<User?> _getUser() async {
+    if (_currenteUser != null) return _currenteUser;
+    try {
+      final GoogleSignInAccount? googleSignInAccount =
+          await googleSignIn.signIn();
+      final GoogleSignInAuthentication googleSignInAuthentication =
+          await googleSignInAccount!.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+          idToken: googleSignInAuthentication.idToken,
+          accessToken: googleSignInAuthentication.accessToken);
+      final UserCredential authResult =
+          await _auth.signInWithCredential(credential);
+      final User? user = authResult.user;
+      return user;
+      //
+    } catch (e) {
+      print("ERRO EM: $e");
+      return null;
+    }
+  }
 
 //----------------------
   void _sendMessage({String? text, File? imgFile}) async {
 //----------------------
-    //final User? user = await _getUser();
+    final User? user = await _getUser();
 //----------------------
-    // if (user == null) {
-    //   //_scaffoldKey.currentState!.showSnackBar(const SnackBar(content: Text("NÃO LOGADO")));
-    //   scaffoldMessengerKey.currentState!.showSnackBar(const SnackBar(
-    //     content: Text("NÃO LOGADO"),
-    //     backgroundColor: Colors.red,
-    //   ));
-    //   print("NÃO LOGADO");
-    // } else {
-    //   scaffoldMessengerKey.currentState!.showSnackBar(const SnackBar(
-    //     content: Text(" LOGADO"),
-    //     backgroundColor: Colors.green,
-    //   ));
-    //   print("LOGADO");
-    // }
+    if (user == null) {
+      // _scaffoldKey.currentState!.showSnackBar(const SnackBar(content: Text("Não foi possivel logar. Tente novamente")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Login failed"),
+            backgroundColor: Colors.red,
+            duration: Duration(milliseconds: 500)),
+      );
+
+      print("NÃO LOGADO>>");
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Logado!!!"),
+            backgroundColor: Colors.green,
+            duration: Duration(milliseconds: 500)),
+      );
+
+      print("LOGADO>>");
+    }
 //----------------------
     Map<String, dynamic> data = {
-      // "uid": user!.uid,
-      // "senderName": user.displayName,
-      // "senderPhotoURL": user.photoURL,
-      // "senderEmail": user.email,
-      // "senderPhoneNumber": user.phoneNumber
+      "uid": user!.uid,
+      "senderName": user.displayName,
+      "senderPhotoURL": user.photoURL,
+      "senderEmail": user.email,
+      "senderPhoneNumber": user.phoneNumber
     };
 
     if (imgFile != null) {
@@ -99,11 +110,12 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: scaffoldMessengerKey,
+      key: _scaffoldKey,
       appBar: AppBar(
         title: const Text('Olá'),
         elevation: 0,
       ),
+      drawer: Drawer(),
       body: Column(
         children: [
           Expanded(
@@ -123,9 +135,9 @@ class _ChatScreenState extends State<ChatScreen> {
                       reverse: true,
                       itemCount: documents.length,
                       itemBuilder: (context, index) {
-                        return ListTile(
-                          title: Text(documents[index].get("text")),
-                        );
+                        // return ListTile(title: Text(documents[index].get("text")));
+                        return ChatMessage(
+                            documents[index].data() as Map<String, dynamic>);
                       },
                     );
                 }
