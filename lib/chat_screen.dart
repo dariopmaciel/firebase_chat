@@ -20,14 +20,17 @@ class _ChatScreenState extends State<ChatScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GlobalKey<ScaffoldMessengerState> _scaffoldKey =
       GlobalKey<ScaffoldMessengerState>();
+  bool _isLoading = false;
   // final GlobalKey<ScaffoldMessengerState> _scaffoldKey =      GlobalKey<ScaffoldMessengerState>();
 
   //
   @override
   void initState() {
     super.initState();
-    FirebaseAuth.instance.authStateChanges().listen((user) {
-      _currenteUser = user;
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      setState(() {
+        _currenteUser = user;
+      });
     });
   }
   //----------------------
@@ -38,14 +41,19 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       final GoogleSignInAccount? googleSignInAccount =
           await googleSignIn.signIn();
+      
       final GoogleSignInAuthentication googleSignInAuthentication =
           await googleSignInAccount!.authentication;
+      
       final AuthCredential credential = GoogleAuthProvider.credential(
           idToken: googleSignInAuthentication.idToken,
           accessToken: googleSignInAuthentication.accessToken);
+      
       final UserCredential authResult =
           await _auth.signInWithCredential(credential);
+      
       final User? user = authResult.user;
+      
       return user;
       //
     } catch (e) {
@@ -61,27 +69,26 @@ class _ChatScreenState extends State<ChatScreen> {
 //----------------------
     if (user == null) {
       // _scaffoldKey.currentState!.showSnackBar(const SnackBar(content: Text("Não foi possivel logar. Tente novamente")));
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("Login failed"),
-            backgroundColor: Colors.red,
-            duration: Duration(milliseconds: 500)),
-      );
-
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //       content: Text("Login failed"),
+      //       backgroundColor: Colors.red,
+      //       duration: Duration(milliseconds: 500)),
+      // );
       print("NÃO LOGADO>>");
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("Logado!!!"),
-            backgroundColor: Colors.green,
-            duration: Duration(milliseconds: 500)),
-      );
-
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //       content: Text("Logado!!!"),
+      //       backgroundColor: Colors.green,
+      //       duration: Duration(milliseconds: 500)),
+      // );
       print("LOGADO>>");
     }
 //----------------------
     Map<String, dynamic> data = {
       "uid": user!.uid,
+      "time": Timestamp.now(),
       "senderName": user.displayName,
       "senderPhotoURL": user.photoURL,
       "senderEmail": user.email,
@@ -95,10 +102,18 @@ class _ChatScreenState extends State<ChatScreen> {
           .child(DateTime.now().millisecondsSinceEpoch.toString())
           .putFile(imgFile);
 
+      setState(() {
+        _isLoading = true;
+      });
+
       TaskSnapshot snapshot = await task;
       String url = await snapshot.ref.getDownloadURL();
       print("LINK DA FOTO: $url");
       data["imgUrl"] = url;
+
+      setState(() {
+        _isLoading = false;
+      });
     }
     if (text != null) data['text'] = text;
 
@@ -112,15 +127,37 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: const Text('Olá'),
+        title: Text(_currenteUser != null
+            ? "Olá, ${_currenteUser!.displayName}"
+            : "Chat App"),
         elevation: 0,
+        centerTitle: true,
+        actions: [
+          _currenteUser != null
+              ? IconButton(
+                  icon: const Icon(Icons.exit_to_app),
+                  onPressed: () {
+                    FirebaseAuth.instance.signOut();
+                    googleSignIn.signOut();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text("Você saiu com Sucesso!"),
+                          duration: Duration(milliseconds: 500)),
+                    );
+                  },
+                )
+              : Container(),
+        ],
       ),
       drawer: Drawer(),
       body: Column(
         children: [
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection("msg").snapshots(),
+              stream: FirebaseFirestore.instance
+                  .collection("msg")
+                  .orderBy("time")
+                  .snapshots(),
               builder: (context, snapshot) {
                 switch (snapshot.connectionState) {
                   case ConnectionState.none:
@@ -137,13 +174,16 @@ class _ChatScreenState extends State<ChatScreen> {
                       itemBuilder: (context, index) {
                         // return ListTile(title: Text(documents[index].get("text")));
                         return ChatMessage(
-                            documents[index].data() as Map<String, dynamic>);
+                            documents[index].data() as Map<String, dynamic>,
+                            true);
+                        //documents[index].data == _currenteUser?.uid);
                       },
                     );
                 }
               },
             ),
           ),
+          _isLoading ? LinearProgressIndicator() : Container(),
           TextComposer(_sendMessage),
         ],
       ),

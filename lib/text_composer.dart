@@ -33,8 +33,6 @@ class _TextComposerState extends State<TextComposer> {
     widget.sendMessage(imgFile: convertedImage);
   }
 
-  
-
 //
   @override
   Widget build(BuildContext context) {
